@@ -1,0 +1,352 @@
+
+/* HERALD VANN D. ALALIM - A122 */
+import java.util.*;
+
+public class plate6 {
+    static Scanner userInput = new Scanner(System.in);
+
+    public static void main(String[] args) {
+        while (true) {
+            System.out.println("Choose a task number (1-8) or 0 to exit:");
+            int taskNumber = userInput.nextInt();
+            userInput.nextLine(); // CHOICES
+            switch (taskNumber) {
+                case 1:
+                    taskConnectComponents();
+                    break;
+                case 2:
+                    taskListEdges();
+                    break;
+                case 3:
+                    taskCycleCheck();
+                    break;
+                case 4:
+                    taskVertexDegree();
+                    break;
+                case 5:
+                    taskBipartiteCheck();
+                    break;
+                case 6:
+                    taskAdjMatrix();
+                    break;
+                case 7:
+                    taskIncMatrix();
+                    break;
+                case 8:
+                    taskIsomorphicCheck();
+                    break;
+                case 0:
+                    System.exit(0);
+                default:
+                    System.out.println("Invalid choice. Try again.");
+            }
+        }
+    }
+
+    /*
+     * Task 1: Determine if a graph is connected and find the number of connected
+     * components
+     */
+    private static void taskConnectComponents() {
+        System.out.println("Enter the total number of vertices:");
+        int totalVertices = userInput.nextInt();
+        System.out.println("Enter the total number of edges:");
+        int totalEdges = userInput.nextInt();
+        List<int[]> edgeConnections = new ArrayList<>();
+        System.out.println("Enter the edges (format: u v):");
+        for (int i = 0; i < totalEdges; i++) {
+            int u = userInput.nextInt();
+            int v = userInput.nextInt();
+            edgeConnections.add(new int[] { u, v });
+        }
+
+        int numComponents = findComponents(totalVertices, edgeConnections);
+        System.out.println("Number of connected components: " + numComponents);
+    }
+
+    private static int findComponents(int totalVertices, List<int[]> edgeConnections) {
+        int[] parentArray = new int[totalVertices];
+        for (int i = 0; i < totalVertices; i++)
+            parentArray[i] = i;
+
+        for (int[] edge : edgeConnections) {
+            int root1 = findRoot(parentArray, edge[0]);
+            int root2 = findRoot(parentArray, edge[1]);
+            if (root1 != root2)
+                parentArray[root1] = root2;
+        }
+
+        Set<Integer> uniqueComponents = new HashSet<>();
+        for (int i = 0; i < totalVertices; i++) {
+            uniqueComponents.add(findRoot(parentArray, i));
+        }
+        return uniqueComponents.size();
+    }
+
+    private static int findRoot(int[] parentArray, int node) {
+        if (parentArray[node] != node) {
+            parentArray[node] = findRoot(parentArray, parentArray[node]);
+        }
+        return parentArray[node];
+    }
+
+    /* Task 2: List edges from adjacency matrix and count their occurrences */
+    private static void taskListEdges() {
+        System.out.println("Enter the size of the adjacency matrix:");
+        int matrixSize = userInput.nextInt();
+        int[][] adjMatrix = new int[matrixSize][matrixSize];
+        System.out.println("Enter the adjacency matrix row by row:");
+        for (int i = 0; i < matrixSize; i++) {
+            for (int j = 0; j < matrixSize; j++) {
+                adjMatrix[i][j] = userInput.nextInt();
+            }
+        }
+
+        Map<String, Integer> edgesCountMap = findEdges(adjMatrix);
+        for (Map.Entry<String, Integer> entry : edgesCountMap.entrySet()) {
+            System.out.println(entry.getKey() + ": " + entry.getValue());
+        }
+    }
+
+    private static Map<String, Integer> findEdges(int[][] adjMatrix) {
+        Map<String, Integer> edgesCountMap = new HashMap<>();
+        int size = adjMatrix.length;
+        for (int i = 0; i < size; i++) {
+            for (int j = i; j < size; j++) {
+                if (adjMatrix[i][j] > 0) {
+                    String edge = i + "-" + j;
+                    edgesCountMap.put(edge, adjMatrix[i][j]);
+                }
+            }
+        }
+        return edgesCountMap;
+    }
+
+    /* Task 3: Check if a graph has a cycle */
+    private static void taskCycleCheck() {
+        System.out.println("Enter the number of vertices:");
+        int vertexCount = userInput.nextInt();
+        System.out.println("Enter the number of edges:");
+        int edgeCount = userInput.nextInt();
+        List<int[]> edgeConnections = new ArrayList<>();
+        System.out.println("Enter the edges (format: u v):");
+        for (int i = 0; i < edgeCount; i++) {
+            int u = userInput.nextInt();
+            int v = userInput.nextInt();
+            edgeConnections.add(new int[] { u, v });
+        }
+
+        boolean hasCycle = detectCycle(vertexCount, edgeConnections);
+        System.out.println("Graph has cycle: " + hasCycle);
+    }
+
+    private static boolean detectCycle(int vertexCount, List<int[]> edgeConnections) {
+        int[] parentArray = new int[vertexCount];
+        for (int i = 0; i < vertexCount; i++)
+            parentArray[i] = i;
+
+        for (int[] edge : edgeConnections) {
+            int root1 = findRoot(parentArray, edge[0]);
+            int root2 = findRoot(parentArray, edge[1]);
+            if (root1 == root2)
+                return true;
+            parentArray[root1] = root2;
+        }
+        return false;
+    }
+
+    /* Task 4: Output the degree of a vertex */
+    private static void taskVertexDegree() {
+        System.out.println("Enter the number of vertices:");
+        int totalVertices = userInput.nextInt();
+        System.out.println("Enter the number of edges:");
+        int totalEdges = userInput.nextInt();
+        List<int[]> edgeConnections = new ArrayList<>();
+        System.out.println("Enter the edges (format: u v):");
+        for (int i = 0; i < totalEdges; i++) {
+            int u = userInput.nextInt();
+            int v = userInput.nextInt();
+            edgeConnections.add(new int[] { u, v });
+        }
+        System.out.println("Enter the vertex to find the degree of:");
+        int vertex = userInput.nextInt();
+
+        int degree = findDegree(edgeConnections, vertex);
+        System.out.println("Degree of vertex " + vertex + ": " + degree);
+    }
+
+    private static int findDegree(List<int[]> edgeConnections, int vertex) {
+        int degree = 0;
+        for (int[] edge : edgeConnections) {
+            if (edge[0] == vertex || edge[1] == vertex) {
+                degree++;
+            }
+        }
+        return degree;
+    }
+
+    /* Task 5: Determine if a graph is bipartite */
+    private static void taskBipartiteCheck() {
+        System.out.println("Enter the number of vertices:");
+        int totalVertices = userInput.nextInt();
+        System.out.println("Enter the number of edges:");
+        int totalEdges = userInput.nextInt();
+        List<int[]> edgeConnections = new ArrayList<>();
+        System.out.println("Enter the edges (format: u v):");
+        for (int i = 0; i < totalEdges; i++) {
+            int u = userInput.nextInt();
+            int v = userInput.nextInt();
+            edgeConnections.add(new int[] { u, v });
+        }
+
+        boolean isBipartiteGraph = checkBipartite(totalVertices, edgeConnections);
+        System.out.println("Graph is bipartite: " + isBipartiteGraph);
+    }
+
+    private static boolean checkBipartite(int totalVertices, List<int[]> edgeConnections) {
+        int[] colorArray = new int[totalVertices];
+        Arrays.fill(colorArray, -1);
+
+        for (int i = 0; i < totalVertices; i++) {
+            if (colorArray[i] == -1) {
+                if (!bfsBipartiteCheck(i, edgeConnections, colorArray)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private static boolean bfsBipartiteCheck(int start, List<int[]> edgeConnections, int[] colorArray) {
+        Queue<Integer> queue = new LinkedList<>();
+        queue.add(start);
+        colorArray[start] = 0;
+
+        while (!queue.isEmpty()) {
+            int currentNode = queue.poll();
+            for (int[] edge : edgeConnections) {
+                if (edge[0] == currentNode) {
+                    int neighbor = edge[1];
+                    if (colorArray[neighbor] == -1) {
+                        colorArray[neighbor] = 1 - colorArray[currentNode];
+                        queue.add(neighbor);
+                    } else if (colorArray[neighbor] == colorArray[currentNode]) {
+                        return false;
+                    }
+                } else if (edge[1] == currentNode) {
+                    int neighbor = edge[0];
+                    if (colorArray[neighbor] == -1) {
+                        colorArray[neighbor] = 1 - colorArray[currentNode];
+                        queue.add(neighbor);
+                    } else if (colorArray[neighbor] == colorArray[currentNode]) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    // Task 6: Create an adjacency matrix from vertex pairs
+    private static void taskAdjMatrix() {
+        System.out.println("Enter the number of vertices:");
+        int totalVertices = userInput.nextInt();
+        System.out.println("Enter the number of edges:");
+        int totalEdges = userInput.nextInt();
+        List<int[]> edgeConnections = new ArrayList<>();
+        System.out.println("Enter the edges (format: u v):");
+        for (int i = 0; i < totalEdges; i++) {
+            int u = userInput.nextInt();
+            int v = userInput.nextInt();
+            edgeConnections.add(new int[] { u, v });
+        }
+
+        int[][] adjacencyMatrix = createAdjMatrix(totalVertices, edgeConnections);
+        displayMatrix(adjacencyMatrix);
+    }
+
+    private static int[][] createAdjMatrix(int totalVertices, List<int[]> edgeConnections) {
+        int[][] adjacencyMatrix = new int[totalVertices][totalVertices];
+        for (int[] edge : edgeConnections) {
+            adjacencyMatrix[edge[0]][edge[1]]++;
+        }
+        return adjacencyMatrix;
+    }
+
+    private static void displayMatrix(int[][] matrix) {
+        for (int[] row : matrix) {
+            for (int val : row) {
+                System.out.print(val + " ");
+            }
+            System.out.println();
+        }
+    }
+
+    /* Task 7: Construct an incidence matrix from vertex pairs */
+    private static void taskIncMatrix() {
+        System.out.println("Enter the number of vertices:");
+        int totalVertices = userInput.nextInt();
+        System.out.println("Enter the number of edges:");
+        int totalEdges = userInput.nextInt();
+        List<int[]> edgeConnections = new ArrayList<>();
+        System.out.println("Enter the edges (format: u v):");
+        for (int i = 0; i < totalEdges; i++) {
+            int u = userInput.nextInt();
+            int v = userInput.nextInt();
+            edgeConnections.add(new int[] { u, v });
+        }
+
+        int[][] incidenceMatrix = createIncMatrix(totalVertices, edgeConnections);
+        displayMatrix(incidenceMatrix);
+    }
+
+    private static int[][] createIncMatrix(int totalVertices, List<int[]> edgeConnections) {
+        int[][] incidenceMatrix = new int[totalVertices][edgeConnections.size()];
+        for (int i = 0; i < edgeConnections.size(); i++) {
+            int[] edge = edgeConnections.get(i);
+            incidenceMatrix[edge[0]][i] = 1;
+            if (edge[0] != edge[1]) {
+                incidenceMatrix[edge[1]][i] = 1;
+            }
+        }
+        return incidenceMatrix;
+    }
+
+    /* Task 8: Check if two graphs are isomorphic */
+    private static void taskIsomorphicCheck() {
+        System.out.println("Enter the number of vertices:");
+        int totalVertices = userInput.nextInt();
+        System.out.println("Enter the number of edges for the first graph:");
+        int edgesGraph1 = userInput.nextInt();
+        List<int[]> edgesList1 = new ArrayList<>();
+        System.out.println("Enter the edges for the first graph (format: u v):");
+        for (int i = 0; i < edgesGraph1; i++) {
+            int u = userInput.nextInt();
+            int v = userInput.nextInt();
+            edgesList1.add(new int[] { u, v });
+        }
+
+        System.out.println("Enter the number of edges for the second graph:");
+        int edgesGraph2 = userInput.nextInt();
+        List<int[]> edgesList2 = new ArrayList<>();
+        System.out.println("Enter the edges for the second graph (format: u v):");
+        for (int i = 0; i < edgesGraph2; i++) {
+            int u = userInput.nextInt();
+            int v = userInput.nextInt();
+            edgesList2.add(new int[] { u, v });
+        }
+
+        boolean isIsomorphic = checkIsomorphic(totalVertices, edgesList1, edgesList2);
+        System.out.println("Graphs are isomorphic: " + isIsomorphic);
+    }
+
+    private static boolean checkIsomorphic(int totalVertices, List<int[]> edgesList1, List<int[]> edgesList2) {
+        if (edgesList1.size() != edgesList2.size())
+            return false;
+
+        int[][] adjMatrix1 = createAdjMatrix(totalVertices, edgesList1);
+        int[][] adjMatrix2 = createAdjMatrix(totalVertices, edgesList2);
+
+        return Arrays.deepEquals(adjMatrix1, adjMatrix2);
+    }
+}
